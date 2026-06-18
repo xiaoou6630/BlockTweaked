@@ -24,6 +24,9 @@ Thumbs.db
 *.log
 npm-debug.log*
 
+# Project spec / planning docs
+prompt.md
+
 # Reference materials (CC-Tweaked source)
 CC-Tweaked-mc-1.20.x/
 CC-Tweaked-mc-1.20.x.zip
