@@ -285,6 +285,7 @@ onMounted(() => {
     trashcan: true,
     move: { scrollbars: true, drag: true, wheel: true },
     sounds: false, renderer: 'zelos',
+    media: '/media/',
   })
 
   workspace.addChangeListener(() => {
