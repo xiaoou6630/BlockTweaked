@@ -1,5 +1,35 @@
 <template>
-  <div ref="blocklyDiv" class="blockly-container"></div>
+  <div class="workspace-wrapper">
+    <div ref="blocklyDiv" class="blockly-container"></div>
+    <div class="ext-bar" @click.stop="showExtensionPicker = true">＋</div>
+
+    <!-- 扩展选择弹窗 -->
+    <Teleport to="body">
+      <div class="modal-overlay" v-if="showExtensionPicker" @click="showExtensionPicker = false">
+        <div class="modal ext-modal" @click.stop>
+          <h3>{{ _b('🔌 选择扩展', '🔌 Select Extension') }}</h3>
+          <p style="font-size:12px;color:#999;margin-bottom:12px;">{{ _b('选择一个扩展添加到工具箱中', 'Select an extension to add to the toolbox') }}</p>
+          <div class="ext-list">
+            <div
+              v-for="ext in availableExtensions"
+              :key="ext.id"
+              class="ext-item"
+              :class="{ installed: ext.id === 'ccexpand' }"
+              @click="toggleExtension(ext.id)"
+            >
+              <span class="ext-icon">{{ ext.icon }}</span>
+              <div class="ext-info">
+                <span class="ext-name">{{ _b(ext.name, ext.nameEn) }}</span>
+                <span class="ext-desc">{{ _b(ext.description, ext.descriptionEn) }}</span>
+              </div>
+              <span class="ext-status">{{ ext.id === 'ccexpand' ? _b('已安装', 'Installed') : _b('即将推出', 'Coming Soon') }}</span>
+            </div>
+          </div>
+          <button class="modal-btn" @click="showExtensionPicker = false">{{ _b('确定', 'OK') }}</button>
+        </div>
+      </div>
+    </Teleport>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -10,6 +40,8 @@ import '../blocks'
 import { initGenerators, generateCode } from '../generators/lua'
 import { kittenTheme } from '../theme'
 import { i18n, _b } from '../locales'
+import { initExtensions, getExtensionCategories } from '../extensions'
+import { getAllExtensions } from '../extensions/extensionManager'
 // Blockly 语言包
 import * as zhHans from 'blockly/msg/zh-hans'
 import * as en from 'blockly/msg/en'
@@ -20,6 +52,8 @@ const emit = defineEmits<{
 
 const blocklyDiv = ref<HTMLElement>()
 let workspace: Blockly.WorkspaceSvg
+const showExtensionPicker = ref(false)
+const availableExtensions = getAllExtensions()
 
 interface ShadowDef { shadow: { type: string; fields?: Record<string, string | number> } }
 function S(str: string): ShadowDef { return { shadow: { type: 'text', fields: { TEXT: str } } } }
@@ -273,6 +307,13 @@ function buildToolbox() {
         { kind: 'block', type: 'settings_clear' }, { kind: 'block', type: 'settings_getNames' },
         block('settings_load', { PATH: S('.settings') }), block('settings_save', { PATH: S('.settings') }),
       ]},
+      // 扩展分类
+      ...getExtensionCategories().map(cat => ({
+        kind: 'category' as const,
+        name: cat.name,
+        colour: cat.colour,
+        contents: cat.contents,
+      })),
     ],
   };
 }
@@ -280,6 +321,9 @@ function buildToolbox() {
 onMounted(() => {
   if (!blocklyDiv.value) return
   initGenerators()
+
+  // 初始化扩展系统
+  initExtensions()
 
   // 应用当前语言的 Blockly 文本（右键菜单等）
   Blockly.setLocale((i18n.lang === 'zh' ? zhHans : en) as unknown as {[key: string]: string})
@@ -332,9 +376,45 @@ onMounted(() => {
   }
 })
 
+// 扩展切换
+function toggleExtension(id: string) {
+  if (id === 'ccexpand') {
+    showExtensionPicker.value = false
+    // 提示用户：扩展已安装，下次加载页面时生效
+    alert(_b('CCExpand 扩展已添加，刷新页面后生效', 'CCExpand extension added. Refresh to apply.'))
+  }
+}
+
 onBeforeUnmount(() => { workspace?.dispose() })
 </script>
 
 <style scoped>
+.workspace-wrapper { position: relative; width: 100%; height: 100%; }
 .blockly-container { width: 100%; height: 100%; }
+.ext-bar {
+  position: absolute; left: 0; bottom: 0;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: #4D96FF; color: #fff; font-size: 20px; font-weight: 700;
+  border-radius: 0 8px 0 0;
+  cursor: pointer; z-index: 10;
+  transition: background 0.15s;
+  user-select: none;
+}
+.ext-bar:hover { background: #3B7DD8; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal { background: #2D2D3F; border-radius: 12px; padding: 24px 28px; max-width: 500px; width: 90%; color: #E0E0E0; box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+.modal h3 { margin-bottom: 16px; font-size: 16px; color: #FFD93D; }
+.ext-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 300px; overflow-y: auto; }
+.ext-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; background: #363649; cursor: pointer; transition: background 0.15s; }
+.ext-item:hover { background: #40405A; }
+.ext-item.installed { border: 1px solid #4ECDC4; }
+.ext-icon { font-size: 24px; }
+.ext-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.ext-name { font-size: 14px; font-weight: 600; color: #E0E0E0; }
+.ext-desc { font-size: 11px; color: #999; }
+.ext-status { font-size: 11px; color: #4ECDC4; font-weight: 600; white-space: nowrap; }
+.modal-btn { margin-top: 8px; padding: 8px 24px; background: #FFD93D; color: #1E1E30; border: none; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; float: right; transition: background 0.15s; }
+.modal-btn:hover { background: #FFC107; }
 </style>
