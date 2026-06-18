@@ -44,7 +44,7 @@ import { kittenTheme } from '../theme'
 import { i18n, _b } from '../locales'
 import { initExtensions, getExtensionCategories } from '../extensions/index'
 import { registerCodeGenerators } from '../extensions/ccexpand'
-import { getAvailableExtensions, getEnabledIds, saveEnabledExtensions } from '../extensions/extensionManager'
+import { getAvailableExtensions, getEnabledIds, saveEnabledExtensions, type Extension } from '../extensions/extensionManager'
 // Blockly 语言包
 import * as zhHans from 'blockly/msg/zh-hans'
 import * as en from 'blockly/msg/en'
@@ -56,7 +56,7 @@ const emit = defineEmits<{
 const blocklyDiv = ref<HTMLElement>()
 let workspace: Blockly.WorkspaceSvg
 const showExtensionPicker = ref(false)
-const availableExtensions = getAvailableExtensions()
+const availableExtensions = ref<Extension[]>([])
 const pendingIds = ref<string[]>(getEnabledIds())
 
 interface ShadowDef { shadow: { type: string; fields?: Record<string, string | number> } }
@@ -328,6 +328,8 @@ onMounted(() => {
 
   // 初始化扩展系统
   initExtensions()
+  // 初始化后再获取扩展列表
+  availableExtensions.value = getAvailableExtensions()
   // 注册扩展积木的代码生成器
   registerCodeGenerators(luaGenerator as any)
 
