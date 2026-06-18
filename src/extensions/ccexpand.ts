@@ -1,6 +1,7 @@
 import * as Blockly from 'blockly'
 import { _b } from '../locales'
 import { registerExtension } from './extensionManager'
+import type { LuaGenerator } from 'blockly/lua'
 
 // ─── GPU Blocks ───
 Blockly.Blocks['gpu_fill'] = {
@@ -125,6 +126,59 @@ Blockly.Blocks['monitor_clear'] = {
     this.setNextStatement(true)
     this.setColour('#1ABC9C')
   }
+}
+
+// ─── Lua Code Generators for Extension Blocks ───
+export function registerCodeGenerators(gen: LuaGenerator) {
+  if (!gen) return
+
+  // GPU
+  gen.forBlock['gpu_fill'] = (block: Blockly.Block) => {
+    const color = gen.valueToCode(block, 'COLOR', 0) || '0x000000'
+    return `peripheral.find("gpu"):fill(${color})\n`
+  }
+  gen.forBlock['gpu_draw_text'] = (block: Blockly.Block) => {
+    const x = gen.valueToCode(block, 'X', 0) || '0'
+    const y = gen.valueToCode(block, 'Y', 0) || '0'
+    const text = gen.valueToCode(block, 'TEXT', 0) || '""'
+    const color = gen.valueToCode(block, 'COLOR', 0) || '0xFFFFFFFF'
+    return `peripheral.find("gpu"):drawText(${x}, ${y}, ${text}, ${color})\n`
+  }
+  gen.forBlock['gpu_sync'] = () => `peripheral.find("gpu"):sync()\n`
+  gen.forBlock['gpu_rectangle'] = (block: Blockly.Block) => {
+    const x = gen.valueToCode(block, 'X', 0) || '0'
+    const y = gen.valueToCode(block, 'Y', 0) || '0'
+    const w = gen.valueToCode(block, 'W', 0) || '10'
+    const h = gen.valueToCode(block, 'H', 0) || '10'
+    const color = gen.valueToCode(block, 'COLOR', 0) || '0x000000'
+    return `peripheral.find("gpu"):filledRectangle(${x}, ${y}, ${w}, ${h}, ${color})\n`
+  }
+  gen.forBlock['gpu_clear_vram'] = () => `peripheral.find("gpu"):clearVRAM()\n`
+
+  // Array Drive
+  gen.forBlock['array_get_drives'] = () => ['peripheral.find("array_drive"):getDrives()', 0]
+  gen.forBlock['array_get_arrays'] = () => ['peripheral.find("array_drive"):getArrays()', 0]
+  gen.forBlock['array_create'] = (block: Blockly.Block) => {
+    const slots = gen.valueToCode(block, 'SLOTS', 0) || '{}'
+    const level = gen.valueToCode(block, 'LEVEL', 0) || '"raid0"'
+    return `peripheral.find("array_drive"):createArray(${slots}, ${level})\n`
+  }
+
+  // FFmpeg
+  gen.forBlock['ffmpeg_check'] = () => ['peripheral.find("ffmpeg_api"):isFFmpegInstalled()', 0]
+  gen.forBlock['ffmpeg_version'] = () => ['peripheral.find("ffmpeg_api"):getFFmpegVersion()', 0]
+  gen.forBlock['ffmpeg_execute'] = (block: Blockly.Block) => {
+    const args = gen.valueToCode(block, 'ARGS', 0) || '{}'
+    return `peripheral.find("ffmpeg_api"):execute(${args})\n`
+  }
+
+  // Monitor
+  gen.forBlock['monitor_set_text'] = (block: Blockly.Block) => {
+    const line = gen.valueToCode(block, 'LINE', 0) || '1'
+    const text = gen.valueToCode(block, 'TEXT', 0) || '""'
+    return `peripheral.find("monitor"):setText(${text})\n`
+  }
+  gen.forBlock['monitor_clear'] = () => `peripheral.find("monitor"):clear()\n`
 }
 
 // ─── Extension Registration ───

@@ -40,7 +40,8 @@ import '../blocks'
 import { initGenerators, generateCode } from '../generators/lua'
 import { kittenTheme } from '../theme'
 import { i18n, _b } from '../locales'
-import { initExtensions, getExtensionCategories } from '../extensions'
+import { initExtensions, getExtensionCategories } from '../extensions/index'
+import { registerCodeGenerators } from '../extensions/ccexpand'
 import { getAllExtensions } from '../extensions/extensionManager'
 // Blockly 语言包
 import * as zhHans from 'blockly/msg/zh-hans'
@@ -324,6 +325,8 @@ onMounted(() => {
 
   // 初始化扩展系统
   initExtensions()
+  // 注册扩展积木的代码生成器
+  registerCodeGenerators(luaGenerator as any)
 
   // 应用当前语言的 Blockly 文本（右键菜单等）
   Blockly.setLocale((i18n.lang === 'zh' ? zhHans : en) as unknown as {[key: string]: string})
@@ -392,16 +395,17 @@ onBeforeUnmount(() => { workspace?.dispose() })
 .workspace-wrapper { position: relative; width: 100%; height: 100%; }
 .blockly-container { width: 100%; height: 100%; }
 .ext-bar {
-  position: absolute; left: 0; bottom: 0;
-  width: 36px; height: 36px;
+  position: fixed; left: 16px; bottom: 16px;
+  width: 40px; height: 40px;
   display: flex; align-items: center; justify-content: center;
-  background: #4D96FF; color: #fff; font-size: 20px; font-weight: 700;
-  border-radius: 0 8px 0 0;
-  cursor: pointer; z-index: 10;
-  transition: background 0.15s;
+  background: #4D96FF; color: #fff; font-size: 22px; font-weight: 700;
+  border-radius: 50%;
+  cursor: pointer; z-index: 999;
+  transition: background 0.15s, transform 0.15s;
   user-select: none;
+  box-shadow: 0 4px 12px rgba(77,150,255,0.4);
 }
-.ext-bar:hover { background: #3B7DD8; }
+.ext-bar:hover { background: #3B7DD8; transform: scale(1.1); }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal { background: #2D2D3F; border-radius: 12px; padding: 24px 28px; max-width: 500px; width: 90%; color: #E0E0E0; box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
