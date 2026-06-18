@@ -90,6 +90,7 @@
           <p class="about-desc">{{ t('aboutDesc') }}</p>
           <p class="about-desc">{{ t('aboutStack') }}</p>
           <p class="about-desc" style="margin-top:6px;color:#999;">{{ t('aboutFile') }}</p>
+          <p class="about-author">xiaoou6630</p>
           <p class="about-copy">© 2026 BlockTweaked</p>
           <button class="modal-btn" @click="showAbout = false">{{ t('ok') }}</button>
         </div>
