@@ -26,45 +26,48 @@ export interface Extension {
   category: ExtensionCategory
 }
 
-// 持久化存储键名
 const STORAGE_KEY = 'bt_extensions'
 
-const loadedExtensions: Map<string, Extension> = new Map()
+// 所有已注册的扩展（可供选择）
+const registeredExtensions: Map<string, Extension> = new Map()
 
 export function registerExtension(ext: Extension) {
-  loadedExtensions.set(ext.id, ext)
+  registeredExtensions.set(ext.id, ext)
 }
 
 export function getExtension(id: string): Extension | undefined {
-  return loadedExtensions.get(id)
+  return registeredExtensions.get(id)
 }
 
-export function getAllExtensions(): Extension[] {
-  return Array.from(loadedExtensions.values())
+// 所有可供选择的扩展
+export function getAvailableExtensions(): Extension[] {
+  return Array.from(registeredExtensions.values())
 }
 
-export function isExtensionLoaded(id: string): boolean {
-  return loadedExtensions.has(id)
-}
-
-export function removeExtension(id: string) {
-  loadedExtensions.delete(id)
-}
-
-export function getExtensionCategories(): ExtensionCategory[] {
-  return Array.from(loadedExtensions.values()).map(ext => ext.category)
-}
-
-// 保存已启用的扩展 ID 到 localStorage
-export function saveEnabledExtensions(ids: string[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(ids))
-}
-
-// 从 localStorage 读取已启用的扩展 ID
-export function loadEnabledExtensions(): string[] {
+// 用户已启用的扩展 ID
+export function getEnabledIds(): string[] {
   try {
     const data = localStorage.getItem(STORAGE_KEY)
     if (data) return JSON.parse(data)
   } catch {}
   return []
+}
+
+// 用户已启用的扩展分类（用于 toolbox）
+export function getExtensionCategories(): ExtensionCategory[] {
+  const enabledIds = getEnabledIds()
+  return enabledIds
+    .map(id => registeredExtensions.get(id))
+    .filter((ext): ext is Extension => !!ext)
+    .map(ext => ext.category)
+}
+
+// 保存用户选择
+export function saveEnabledExtensions(ids: string[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(ids))
+}
+
+// 检查某个扩展是否已启用
+export function isExtensionEnabled(id: string): boolean {
+  return getEnabledIds().includes(id)
 }

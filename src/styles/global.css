@@ -200,3 +200,15 @@ html, body {
   color: #CCC !important;
   pointer-events: none !important;
 }
+
+/* 工具箱底部的 + 添加扩展按钮 */
+.ext-add-btn {
+  display: flex; align-items: center; justify-content: center;
+  padding: 10px 12px; margin: 8px 6px;
+  background: rgba(77,150,255,0.15);
+  color: #4D96FF; font-size: 13px; font-weight: 600;
+  border-radius: 8px; cursor: pointer;
+  transition: background 0.15s;
+  user-select: none; white-space: nowrap;
+}
+.ext-add-btn:hover { background: rgba(77,150,255,0.3); }

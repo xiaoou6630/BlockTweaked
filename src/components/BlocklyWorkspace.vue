@@ -1,31 +1,33 @@
 <template>
   <div class="workspace-wrapper">
     <div ref="blocklyDiv" class="blockly-container"></div>
-    <div class="ext-bar" @click.stop="showExtensionPicker = true">＋</div>
 
     <!-- 扩展选择弹窗 -->
     <Teleport to="body">
       <div class="modal-overlay" v-if="showExtensionPicker" @click="showExtensionPicker = false">
         <div class="modal ext-modal" @click.stop>
           <h3>{{ _b('🔌 选择扩展', '🔌 Select Extension') }}</h3>
-          <p style="font-size:12px;color:#999;margin-bottom:12px;">{{ _b('选择一个扩展添加到工具箱中', 'Select an extension to add to the toolbox') }}</p>
+          <p style="font-size:12px;color:#999;margin-bottom:12px;">{{ _b('勾选要添加到工具箱的扩展', 'Select extensions to add to the toolbox') }}</p>
           <div class="ext-list">
             <div
               v-for="ext in availableExtensions"
               :key="ext.id"
               class="ext-item"
-              :class="{ installed: ext.id === 'ccexpand' }"
-              @click="toggleExtension(ext.id)"
+              :class="{ checked: pendingIds.includes(ext.id) }"
+              @click="togglePending(ext.id)"
             >
+              <span class="ext-check">{{ pendingIds.includes(ext.id) ? '☑' : '☐' }}</span>
               <span class="ext-icon">{{ ext.icon }}</span>
               <div class="ext-info">
                 <span class="ext-name">{{ _b(ext.name, ext.nameEn) }}</span>
                 <span class="ext-desc">{{ _b(ext.description, ext.descriptionEn) }}</span>
               </div>
-              <span class="ext-status">{{ ext.id === 'ccexpand' ? _b('已安装', 'Installed') : _b('即将推出', 'Coming Soon') }}</span>
             </div>
           </div>
-          <button class="modal-btn" @click="showExtensionPicker = false">{{ _b('确定', 'OK') }}</button>
+          <div class="ext-actions">
+            <button class="modal-btn cancel" @click="showExtensionPicker = false">{{ _b('取消', 'Cancel') }}</button>
+            <button class="modal-btn" @click="confirmExtensions">{{ _b('添加', 'Add') }}</button>
+          </div>
         </div>
       </div>
     </Teleport>
@@ -42,7 +44,7 @@ import { kittenTheme } from '../theme'
 import { i18n, _b } from '../locales'
 import { initExtensions, getExtensionCategories } from '../extensions/index'
 import { registerCodeGenerators } from '../extensions/ccexpand'
-import { getAllExtensions } from '../extensions/extensionManager'
+import { getAvailableExtensions, getEnabledIds, saveEnabledExtensions } from '../extensions/extensionManager'
 // Blockly 语言包
 import * as zhHans from 'blockly/msg/zh-hans'
 import * as en from 'blockly/msg/en'
@@ -54,7 +56,8 @@ const emit = defineEmits<{
 const blocklyDiv = ref<HTMLElement>()
 let workspace: Blockly.WorkspaceSvg
 const showExtensionPicker = ref(false)
-const availableExtensions = getAllExtensions()
+const availableExtensions = getAvailableExtensions()
+const pendingIds = ref<string[]>(getEnabledIds())
 
 interface ShadowDef { shadow: { type: string; fields?: Record<string, string | number> } }
 function S(str: string): ShadowDef { return { shadow: { type: 'text', fields: { TEXT: str } } } }
@@ -358,6 +361,9 @@ onMounted(() => {
     isDirty() { return workspace.getAllBlocks(false).length > 0 }
   }
 
+  // 注入扩展按钮
+  injectExtButton()
+
   // 语言切换：保存XML到localStorage，重载页面后恢复
   watch(() => i18n.lang, () => {
     // 保存当前工作区
@@ -380,12 +386,28 @@ onMounted(() => {
 })
 
 // 扩展切换
-function toggleExtension(id: string) {
-  if (id === 'ccexpand') {
-    showExtensionPicker.value = false
-    // 提示用户：扩展已安装，下次加载页面时生效
-    alert(_b('CCExpand 扩展已添加，刷新页面后生效', 'CCExpand extension added. Refresh to apply.'))
-  }
+function togglePending(id: string) {
+  const idx = pendingIds.value.indexOf(id)
+  if (idx >= 0) pendingIds.value.splice(idx, 1)
+  else pendingIds.value.push(id)
+}
+
+function confirmExtensions() {
+  saveEnabledExtensions(pendingIds.value)
+  showExtensionPicker.value = false
+  // 刷新页面使扩展生效
+  location.reload()
+}
+
+// 在工具箱底部注入 + 号按钮
+function injectExtButton() {
+  const toolbox = document.querySelector('.blocklyToolboxDiv')
+  if (!toolbox) return
+  const btn = document.createElement('div')
+  btn.className = 'ext-add-btn'
+  btn.textContent = '＋ 添加扩展'
+  btn.addEventListener('click', () => { showExtensionPicker.value = true })
+  toolbox.appendChild(btn)
 }
 
 onBeforeUnmount(() => { workspace?.dispose() })
@@ -394,18 +416,6 @@ onBeforeUnmount(() => { workspace?.dispose() })
 <style scoped>
 .workspace-wrapper { position: relative; width: 100%; height: 100%; }
 .blockly-container { width: 100%; height: 100%; }
-.ext-bar {
-  position: fixed; left: 16px; bottom: 16px;
-  width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
-  background: #4D96FF; color: #fff; font-size: 22px; font-weight: 700;
-  border-radius: 50%;
-  cursor: pointer; z-index: 999;
-  transition: background 0.15s, transform 0.15s;
-  user-select: none;
-  box-shadow: 0 4px 12px rgba(77,150,255,0.4);
-}
-.ext-bar:hover { background: #3B7DD8; transform: scale(1.1); }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal { background: #2D2D3F; border-radius: 12px; padding: 24px 28px; max-width: 500px; width: 90%; color: #E0E0E0; box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
@@ -419,6 +429,11 @@ onBeforeUnmount(() => { workspace?.dispose() })
 .ext-name { font-size: 14px; font-weight: 600; color: #E0E0E0; }
 .ext-desc { font-size: 11px; color: #999; }
 .ext-status { font-size: 11px; color: #4ECDC4; font-weight: 600; white-space: nowrap; }
-.modal-btn { margin-top: 8px; padding: 8px 24px; background: #FFD93D; color: #1E1E30; border: none; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; float: right; transition: background 0.15s; }
-.modal-btn:hover { background: #FFC107; }
+.ext-check { font-size: 18px; color: #4D96FF; width: 24px; text-align: center; }
+.ext-item.checked { border: 1px solid #4D96FF; background: rgba(77,150,255,0.1); }
+.ext-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.modal-btn { padding: 8px 24px; background: #4D96FF; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; transition: background 0.15s; }
+.modal-btn:hover { background: #3B7DD8; }
+.modal-btn.cancel { background: #555; color: #CCC; }
+.modal-btn.cancel:hover { background: #666; }
 </style>
