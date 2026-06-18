@@ -91,6 +91,7 @@
           <p class="about-desc">{{ t('aboutStack') }}</p>
           <p class="about-desc" style="margin-top:6px;color:#999;">{{ t('aboutFile') }}</p>
           <p class="about-author">xiaoou6630</p>
+          <p class="about-link" @click="openGitHub">🌐 GitHub: xiaoou6630/BlockTweaked</p>
           <p class="about-copy">© 2026 BlockTweaked</p>
           <button class="modal-btn" @click="showAbout = false">{{ t('ok') }}</button>
         </div>
@@ -205,6 +206,7 @@ function handleLang() {
 function handleHelp() { showSettings.value = false; showHelp.value = true }
 function handleEnv() { showSettings.value = false; detectEnv() }
 function handleAbout() { showSettings.value = false; showAbout.value = true }
+function openGitHub() { window.open('https://github.com/xiaoou6630/BlockTweaked', '_blank') }
 </script>
 
 <style scoped>
@@ -256,6 +258,9 @@ function handleAbout() { showSettings.value = false; showAbout.value = true }
 
 .about-ver { color: #999; font-size: 12px; margin-bottom: 8px; }
 .about-desc { font-size: 13px; color: #CCC; margin-bottom: 4px; }
+.about-author { font-size: 13px; color: #FFD93D; margin-bottom: 4px; }
+.about-link { font-size: 12px; color: #4D96FF; cursor: pointer; margin-bottom: 4px; }
+.about-link:hover { text-decoration: underline; }
 .about-copy { font-size: 11px; color: #666; margin-top: 12px; }
 .modal-btn { margin-top: 16px; padding: 8px 24px; background: #FFD93D; color: #1E1E30; border: none; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; float: right; transition: background 0.15s; }
 .modal-btn:hover { background: #FFC107; }
