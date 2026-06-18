@@ -173,3 +173,30 @@ html, body {
   stroke: #4D96FF !important;
   opacity: 0.4 !important;
 }
+
+/* 右键菜单样式 */
+.blocklyContextMenu {
+  background: #FFFFFF !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  padding: 6px !important;
+}
+
+.blocklyContextMenu .blocklyMenuItem {
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-size: 13px !important;
+  font-family: 'PingFang SC', 'Noto Sans SC', sans-serif !important;
+  color: #333 !important;
+  transition: background 0.15s !important;
+}
+
+.blocklyContextMenu .blocklyMenuItem:hover {
+  background: #F3F4F6 !important;
+}
+
+.blocklyContextMenu .blocklyMenuItemDisabled {
+  color: #CCC !important;
+  pointer-events: none !important;
+}

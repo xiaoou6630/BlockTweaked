@@ -10,6 +10,9 @@ import '../blocks'
 import { initGenerators, generateCode } from '../generators/lua'
 import { kittenTheme } from '../theme'
 import { i18n, _b } from '../locales'
+// Blockly 语言包
+import * as zhHans from 'blockly/msg/zh-hans'
+import * as en from 'blockly/msg/en'
 
 const emit = defineEmits<{
   (e: 'code-change', code: string): void
@@ -277,6 +280,9 @@ function buildToolbox() {
 onMounted(() => {
   if (!blocklyDiv.value) return
   initGenerators()
+
+  // 应用当前语言的 Blockly 文本（右键菜单等）
+  Blockly.setLocale((i18n.lang === 'zh' ? zhHans : en) as unknown as {[key: string]: string})
 
   workspace = Blockly.inject(blocklyDiv.value, {
     toolbox: buildToolbox(), theme: kittenTheme,
