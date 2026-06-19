@@ -1,13 +1,9 @@
 # BlockTweaked 🧊
 
-> A visual block programming editor for Minecraft **CC: Tweaked** (1.20.x).  
+> A visual block programming editor for Minecraft **CC: Tweaked** (1.20.x).\
 > Drag, drop, and generate **Lua 5.1** code for in-game computers and turtles — no more typing on a tiny Minecraft screen!
 
-<div align="center">
-  <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=A%20clean%2C%20modern%20web%20interface%20with%20a%20two-column%20layout%3A%20left%20side%20shows%20colorful%20blockly%20programming%20blocks%20in%20kitten-style%20rounded%20design%2C%20right%20side%20shows%20generated%20Lua%20code%20with%20syntax%20highlighting.%20Top%20bar%20with%20project%20name.%20Overall%20pastel%20and%20playful%20aesthetic.&image_size=landscape_16_9" alt="BlockTweaked Screenshot" width="800">
-</div>
-
----
+***
 
 ## ✨ Features
 
@@ -20,13 +16,13 @@
 - 💾 **Project Management** — Name your project (≤15 chars), save/load workspace
 - 🖥️ **Dual-Column Layout** — Blocks on the left, code on the right (Mixly-style)
 
----
+***
 
 ## 🚀 Quick Start
 
 ### Option 1: Use the hosted version
 
-> Hosted on Hat Cloud with domestic CDN acceleration (China-friendly).  
+> Hosted on Hat Cloud with domestic CDN acceleration (China-friendly).\
 > **[→ Try BlockTweaked Online](https://blocktweaked.hatcloud.cc)**
 
 ### Option 2: Run locally
@@ -53,7 +49,7 @@ npm run build
 # Output: dist/ — deploy to any static server
 ```
 
----
+***
 
 ## 📖 Usage
 
@@ -65,76 +61,76 @@ npm run build
 
 ### Block Categories
 
-| Category | Description |
-|----------|-------------|
-| ⚡ Events | Event listeners (startup, key press, modem, redstone, etc.) |
-| 🐢 Turtle | Movement, digging, placing, farming, attacking |
-| 🔴 Redstone | Set outputs, get inputs, bundled cables |
-| 📡 Rednet | Send/receive modem messages |
-| 🔌 Peripheral | Wrap and interact with peripherals |
-| 📺 OS/Term | Print, clear, computer ID, sleep |
-| 📂 File System | Open/read/write/close files |
-| 🌐 HTTP | GET/POST requests |
-| 🎨 Colors | Colour/ dye APIs |
-| 📐 GPS | Locate and triangulate |
-| 🧵 Parallel | Run parallel tasks |
-| 🖌 Paintutils | Drawing utilities |
-| ➗ Math | Arithmetic, random, trigonometry |
-| 📝 Text | String operations, textutils |
-| 🔑 Keys | Key code constants |
-| ⚙️ Settings | Global settings API |
-| 🪟 Window | Terminal window management |
+| Category       | Description                                                 |
+| -------------- | ----------------------------------------------------------- |
+| ⚡ Events       | Event listeners (startup, key press, modem, redstone, etc.) |
+| 🐢 Turtle      | Movement, digging, placing, farming, attacking              |
+| 🔴 Redstone    | Set outputs, get inputs, bundled cables                     |
+| 📡 Rednet      | Send/receive modem messages                                 |
+| 🔌 Peripheral  | Wrap and interact with peripherals                          |
+| 📺 OS/Term     | Print, clear, computer ID, sleep                            |
+| 📂 File System | Open/read/write/close files                                 |
+| 🌐 HTTP        | GET/POST requests                                           |
+| 🎨 Colors      | Colour/ dye APIs                                            |
+| 📐 GPS         | Locate and triangulate                                      |
+| 🧵 Parallel    | Run parallel tasks                                          |
+| 🖌 Paintutils  | Drawing utilities                                           |
+| ➗ Math         | Arithmetic, random, trigonometry                            |
+| 📝 Text        | String operations, textutils                                |
+| 🔑 Keys        | Key code constants                                          |
+| ⚙️ Settings    | Global settings API                                         |
+| 🪟 Window      | Terminal window management                                  |
 
----
+***
 
 ## 🛠️ Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| [Vue 3](https://vuejs.org/) (Composition API) | UI framework |
-| [TypeScript](https://www.typescriptlang.org/) | Type safety |
-| [Google Blockly](https://developers.google.com/blockly) | Visual block editor engine |
-| [CodeMirror 6](https://codemirror.net/) | Lua code editor with syntax highlighting |
-| [Vite](https://vitejs.dev/) | Build tool & dev server |
-| [Pinia](https://pinia.vuejs.org/) | State management |
+| Technology                                              | Purpose                                  |
+| ------------------------------------------------------- | ---------------------------------------- |
+| [Vue 3](https://vuejs.org/) (Composition API)           | UI framework                             |
+| [TypeScript](https://www.typescriptlang.org/)           | Type safety                              |
+| [Google Blockly](https://developers.google.com/blockly) | Visual block editor engine               |
+| [CodeMirror 6](https://codemirror.net/)                 | Lua code editor with syntax highlighting |
+| [Vite](https://vitejs.dev/)                             | Build tool & dev server                  |
+| [Pinia](https://pinia.vuejs.org/)                       | State management                         |
 
----
+***
 
 ## 🧊 CC: Tweaked API Coverage
 
 BlockTweaked provides blocks for the following CC: Tweaked APIs (Minecraft 1.20.x):
 
-| API | Status |
-|-----|--------|
-| `turtle` | ✅ Full |
-| `redstone` | ✅ Full |
-| `rednet` | ✅ Full |
-| `peripheral` | ✅ Full |
-| `os` | ✅ Core |
-| `term` / `window` | ✅ Full |
-| `fs` | ✅ Full |
-| `http` | ✅ Full |
-| `colors` | ✅ Full |
-| `gps` | ✅ Full |
-| `paintutils` | ✅ Full |
-| `textutils` | ✅ Full |
-| `keys` | ✅ Full |
-| `settings` | ✅ Full |
-| `parallel` | ✅ Full |
-| `io` | ✅ Core |
-| `disk` | ✅ Core |
-| `help` | ✅ Basic |
-| Global functions | ✅ Core |
+| API               | Status  |
+| ----------------- | ------- |
+| `turtle`          | ✅ Full  |
+| `redstone`        | ✅ Full  |
+| `rednet`          | ✅ Full  |
+| `peripheral`      | ✅ Full  |
+| `os`              | ✅ Core  |
+| `term` / `window` | ✅ Full  |
+| `fs`              | ✅ Full  |
+| `http`            | ✅ Full  |
+| `colors`          | ✅ Full  |
+| `gps`             | ✅ Full  |
+| `paintutils`      | ✅ Full  |
+| `textutils`       | ✅ Full  |
+| `keys`            | ✅ Full  |
+| `settings`        | ✅ Full  |
+| `parallel`        | ✅ Full  |
+| `io`              | ✅ Core  |
+| `disk`            | ✅ Core  |
+| `help`            | ✅ Basic |
+| Global functions  | ✅ Core  |
 
 > Based on [CC: Tweaked v1.20.x source](https://github.com/cc-tweaked/CC-Tweaked/tree/mc-1.20.x).
 
----
+***
 
 ## 🌍 Internationalisation
 
 Switch between 中文 and English from the Settings menu. Block labels, tooltips, toolbox categories, and UI text all update instantly.
 
----
+***
 
 ## 🤝 Contributing
 
@@ -146,13 +142,13 @@ Contributions, issues, and feature requests are welcome!
 4. Push to the branch (`git push origin feat/amazing`)
 5. Open a Pull Request
 
----
+***
 
 ## 📄 License
 
 [MIT](LICENSE) © 2026 xiaoou6630
 
----
+***
 
 <div align="center">
   Made with ❤️ for the CC: Tweaked community

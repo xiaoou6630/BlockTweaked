@@ -26,11 +26,14 @@
           </div>
           <div class="ext-actions">
             <button class="modal-btn cancel" @click="showExtensionPicker = false">{{ _b('取消', 'Cancel') }}</button>
+            <button class="modal-btn import-btn" @click="triggerImportExt">{{ _b('📁 导入自定义扩展', '📁 Import Custom') }}</button>
             <button class="modal-btn" @click="confirmExtensions">{{ _b('添加', 'Add') }}</button>
           </div>
         </div>
       </div>
     </Teleport>
+
+    <input ref="extFileInput" type="file" accept=".bt-ext.json" style="display:none" @change="handleImportExt" />
   </div>
 </template>
 
@@ -44,7 +47,7 @@ import { kittenTheme } from '../theme'
 import { i18n, _b } from '../locales'
 import { initExtensions, getExtensionCategories } from '../extensions/index'
 import { registerCodeGenerators } from '../extensions/ccexpand'
-import { getAvailableExtensions, getEnabledIds, saveEnabledExtensions, type Extension } from '../extensions/extensionManager'
+import { getAvailableExtensions, getEnabledIds, saveEnabledExtensions, registerCustomExtension, restoreCustomExtensions, type Extension, type CustomExtFile } from '../extensions/extensionManager'
 // Blockly 语言包
 import * as zhHans from 'blockly/msg/zh-hans'
 import * as en from 'blockly/msg/en'
@@ -58,6 +61,7 @@ let workspace: Blockly.WorkspaceSvg
 const showExtensionPicker = ref(false)
 const availableExtensions = ref<Extension[]>([])
 const pendingIds = ref<string[]>(getEnabledIds())
+const extFileInput = ref<HTMLInputElement>()
 
 interface ShadowDef { shadow: { type: string; fields?: Record<string, string | number> } }
 function S(str: string): ShadowDef { return { shadow: { type: 'text', fields: { TEXT: str } } } }
@@ -94,6 +98,7 @@ function buildToolbox() {
         block('write', { TEXT: S('Hello World') }),
         block('print', { TEXT: S('Hello World') }),
         { kind: 'block', type: 'read' },
+        { kind: 'block', type: 'printError' },
       ]},
       { kind: 'category', name: _b('🐢 机器人', '🐢 Turtle'), colour: '#FF9A76', contents: [
         { kind: 'block', type: 'turtle_forward' }, { kind: 'block', type: 'turtle_back' },
@@ -114,6 +119,9 @@ function buildToolbox() {
         { kind: 'block', type: 'turtle_getItemSpace' },
         { kind: 'block', type: 'turtle_compareTo' }, block('turtle_transferTo', { COUNT: N(1) }),
         { kind: 'block', type: 'turtle_equip' },
+        { kind: 'block', type: 'turtle_craft' },
+        { kind: 'block', type: 'turtle_equipLeft' },
+        { kind: 'block', type: 'turtle_equipRight' },
         { kind: 'block', type: 'turtle_getFuelLevel' }, { kind: 'block', type: 'turtle_getFuelLimit' },
         block('turtle_refuel', { COUNT: N(64) }),
       ]},
@@ -167,6 +175,8 @@ function buildToolbox() {
         { kind: 'block', type: 'term_getTextColor' }, { kind: 'block', type: 'term_getBackgroundColor' },
         block('term_blit', { TEXT: S(''), TEXT_COLOR: S(''), BG_COLOR: S('') }),
         { kind: 'block', type: 'term_isColor' }, { kind: 'block', type: 'term_read' },
+        { kind: 'block', type: 'term_setPaletteColour' },
+        { kind: 'block', type: 'term_getPaletteColour' },
         block('term_redirect', { TARGET: S('term.native()') }),
         { kind: 'block', type: 'term_current' }, { kind: 'block', type: 'term_native' },
         block('term_setCursorBlink', { BLINK: B('true') }), { kind: 'block', type: 'term_getCursorBlink' },
@@ -178,10 +188,12 @@ function buildToolbox() {
         block('os_sleep', { TIME: N(1) }),
         { kind: 'block', type: 'os_time' }, { kind: 'block', type: 'os_clock' },
         { kind: 'block', type: 'os_version' }, { kind: 'block', type: 'os_day' },
+        { kind: 'block', type: 'os_epoch' },
+        { kind: 'block', type: 'os_date' },
+        { kind: 'block', type: 'os_pullEventRaw' },
         block('os_startTimer', { TIME: N(1) }), block('os_cancelTimer', { ID: N(0) }),
         block('os_setAlarm', { TIME: N(12) }), block('os_cancelAlarm', { ID: N(0) }),
         { kind: 'block', type: 'os_shutdown' }, { kind: 'block', type: 'os_reboot' },
-        { kind: 'block', type: 'os_getFuelLevel' }, block('os_setFuelLevel', { LEVEL: N(0) }),
       ]},
       { kind: 'category', name: _b('🎯 控制结构', '🎯 Controls'), colour: '#FFD93D', contents: [
         { kind: 'block', type: 'controls_if' },
@@ -211,11 +223,13 @@ function buildToolbox() {
         block('text_join', { A: S('Hello'), B: S(' World') }),
         block('text_length', { TEXT: S('') }), block('text_isEmpty', { TEXT: S('') }),
         block('text_substring', { TEXT: S(''), FROM: N(1), TO: N(1) }),
-        { kind: 'sep' },
+      ]},
+      { kind: 'category', name: _b('📝 文本工具', '📝 Text Utils'), colour: '#8E44AD', contents: [
         block('textutils_slowWrite', { TEXT: S('Hello'), RATE: N(0.05) }),
         block('textutils_slowPrint', { TEXT: S('Hello'), RATE: N(0.05) }),
         block('textutils_formatTime', { TIME: N(0) }),
         block('textutils_pagedPrint', { TEXT: S('') }), block('textutils_tabulate', { TABLE: S('{}') }),
+        block('textutils_pagedTabulate', { TABLE: S('{}') }),
         block('textutils_urlEncode', { STRING: S('') }),
         { kind: 'sep' },
         block('textutils_serialize', { TABLE: S('{}') }), block('textutils_unserialize', { STRING: S('{}') }),
@@ -230,7 +244,7 @@ function buildToolbox() {
         { kind: 'block', type: 'rednet_isOpen' },
         block('rednet_send', { RECIPIENT: N(0), MESSAGE: S('') }),
         block('rednet_broadcast', { MESSAGE: S('') }),
-        block('rednet_receive', { TIMEOUT: N(5) }),
+        block('rednet_receive', { PROTOCOL: S(''), TIMEOUT: N(5) }),
         block('rednet_host', { PROTOCOL: S('my_protocol'), HOSTNAME: S('my_host') }),
         block('rednet_unhost', { PROTOCOL: S('my_protocol') }),
         block('rednet_lookup', { PROTOCOL: S('my_protocol'), HOSTNAME: S('my_host') }),
@@ -276,7 +290,7 @@ function buildToolbox() {
         block('vector_tostring', { V: N(0) }),
       ]},
       { kind: 'category', name: _b('⌨️ 按键检测', '⌨️ Keys'), colour: '#FF5722', contents: [
-        block('keys_getName', { KEY: N(0) }),
+        block('keys_getName', { KEY: N(0) }), block('keys_getCode', { NAME: S('a') }),
       ]},
       { kind: 'category', name: _b('📂 文件IO', '📂 File I/O'), colour: '#1ABC9C', contents: [
         block('io_open', { PATH: S('') }),
@@ -310,6 +324,7 @@ function buildToolbox() {
         block('settings_get', { NAME: S('my_setting') }), block('settings_unset', { NAME: S('my_setting') }),
         { kind: 'block', type: 'settings_clear' }, { kind: 'block', type: 'settings_getNames' },
         block('settings_load', { PATH: S('.settings') }), block('settings_save', { PATH: S('.settings') }),
+        { kind: 'block', type: 'settings_undefine' }, { kind: 'block', type: 'settings_getDetails' },
       ]},
       // 扩展分类
       ...getExtensionCategories().map(cat => ({
@@ -328,6 +343,12 @@ onMounted(() => {
 
   // 初始化扩展系统
   initExtensions()
+  // 恢复自定义扩展
+  const customExts = restoreCustomExtensions()
+  // 注册自定义扩展的代码生成器
+  for (const data of customExts) {
+    registerCustomGenerators(data)
+  }
   // 初始化后再获取扩展列表
   availableExtensions.value = getAvailableExtensions()
   // 注册扩展积木的代码生成器
@@ -401,6 +422,71 @@ function confirmExtensions() {
   location.reload()
 }
 
+// 导入自定义扩展
+function triggerImportExt() {
+  extFileInput.value?.click()
+}
+
+function handleImportExt(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result as string)
+      const ext = registerCustomExtension(data)
+      // 注册代码生成器
+      registerCustomGenerators(data)
+      // 自动启用
+      if (!pendingIds.value.includes(ext.id)) {
+        pendingIds.value.push(ext.id)
+      }
+      availableExtensions.value = [...getAvailableExtensions()]
+      alert(_b(`扩展 "${ext.name}" 导入成功，点击"添加"生效`, `Extension "${ext.nameEn}" imported, click "Add" to apply`))
+    } catch (err) {
+      alert(_b('扩展格式无效', 'Invalid extension format'))
+    }
+  }
+  reader.readAsText(file)
+  // 重置 input 以便再次选择同一文件
+  ;(e.target as HTMLInputElement).value = ''
+}
+
+/** 注册自定义扩展的代码生成器（模板字符串方式） */
+function registerCustomGenerators(data: CustomExtFile) {
+  if (!data.generators) return
+  for (const [blockType, template] of Object.entries(data.generators)) {
+    if (typeof template === 'string') {
+      // 判断是语句积木还是值积木
+      const blockDef = data.blocks.find((b: any) => b.type === blockType)
+      const isValue = blockDef && blockDef.output
+      if (isValue) {
+        ;(luaGenerator as any).forBlock[blockType] = (block: Blockly.Block) => {
+          let code = template
+          for (const field of block.inputList.flatMap((i: any) => i.fieldRow)) {
+            const name = (field as any).name
+            if (name) {
+              code = code.replace(new RegExp(`\\$\\{${name}\\}`, 'g'), String(block.getFieldValue(name) ?? ''))
+            }
+          }
+          return [code, 0]
+        }
+      } else {
+        ;(luaGenerator as any).forBlock[blockType] = (block: Blockly.Block) => {
+          let code = template
+          for (const field of block.inputList.flatMap((i: any) => i.fieldRow)) {
+            const name = (field as any).name
+            if (name) {
+              code = code.replace(new RegExp(`\\$\\{${name}\\}`, 'g'), String(block.getFieldValue(name) ?? ''))
+            }
+          }
+          return code + '\n'
+        }
+      }
+    }
+  }
+}
+
 // 在工具箱底部注入 + 号按钮
 function injectExtButton() {
   const toolbox = document.querySelector('.blocklyToolboxDiv')
@@ -438,4 +524,6 @@ onBeforeUnmount(() => { workspace?.dispose() })
 .modal-btn:hover { background: #3B7DD8; }
 .modal-btn.cancel { background: #555; color: #CCC; }
 .modal-btn.cancel:hover { background: #666; }
+.modal-btn.import-btn { background: #E67E22; }
+.modal-btn.import-btn:hover { background: #D35400; }
 </style>

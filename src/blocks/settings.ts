@@ -33,9 +33,12 @@ Blockly.Blocks['settings_get'] = {
     this.appendValueInput('NAME')
       .setCheck('String')
       .appendField(_b('⚙️ 获取设置', '⚙️ Get'))
+    this.appendValueInput('DEFAULT')
+      .setCheck(null)
+      .appendField(_b('默认值', 'Default'))
     this.setOutput(true, null)
     this.setColour('#607D8B')
-    this.setTooltip('获取指定设置项的值')
+    this.setTooltip('获取指定设置项的值，可设置默认值')
   },
 }
 
@@ -93,6 +96,29 @@ Blockly.Blocks['settings_save'] = {
     this.setNextStatement(true)
     this.setColour('#607D8B')
     this.setTooltip('保存设置到文件')
+  },
+}
+
+Blockly.Blocks['settings_undefine'] = {
+  init: function() {
+    this.appendValueInput('NAME')
+      .setCheck('String')
+      .appendField(_b('⚙️ 取消定义设置', '⚙️ Undefine'))
+    this.setPreviousStatement(true)
+    this.setNextStatement(true)
+    this.setColour('#607D8B')
+    this.setTooltip('取消定义设置项')
+  },
+}
+
+Blockly.Blocks['settings_getDetails'] = {
+  init: function() {
+    this.appendValueInput('NAME')
+      .setCheck('String')
+      .appendField(_b('⚙️ 获取设置详情', '⚙️ Get Details'))
+    this.setOutput(true, null)
+    this.setColour('#607D8B')
+    this.setTooltip('获取设置项的详细信息（值、默认值、描述）')
   },
 }
 

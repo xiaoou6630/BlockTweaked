@@ -12,4 +12,15 @@ Blockly.Blocks['keys_getName'] = {
   },
 }
 
+Blockly.Blocks['keys_getCode'] = {
+  init: function() {
+    this.appendValueInput('NAME')
+      .setCheck('String')
+      .appendField(_b('⌨️ 按键代码', '⌨️ Key Code'))
+    this.setOutput(true, 'Number')
+    this.setColour('#FF5722')
+    this.setTooltip('获取按键名称对应的代码')
+  },
+}
+
 export const keysBlocks = Object.keys(Blockly.Blocks).filter(k => k.startsWith('keys_'))

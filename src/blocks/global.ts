@@ -35,4 +35,16 @@ Blockly.Blocks['read'] = {
   },
 }
 
-export const globalBlocks = Object.keys(Blockly.Blocks).filter(k => k === 'write' || k === 'print' || k === 'read')
+Blockly.Blocks['printError'] = {
+  init: function() {
+    this.appendValueInput('TEXT')
+      .setCheck('String')
+      .appendField(_b('❌ 打印错误', '❌ Print Error'))
+    this.setPreviousStatement(true)
+    this.setNextStatement(true)
+    this.setColour('#FF6B6B')
+    this.setTooltip('以红色打印错误信息')
+  },
+}
+
+export const globalBlocks = Object.keys(Blockly.Blocks).filter(k => k === 'write' || k === 'print' || k === 'read' || k === 'printError')

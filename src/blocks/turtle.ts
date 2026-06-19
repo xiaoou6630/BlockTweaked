@@ -170,6 +170,7 @@ Blockly.Blocks['turtle_drop'] = {
   init: function() {
     this.appendDummyInput().appendField(_b('🐢 丢弃', '🐢 Drop'))
       .appendField(new Blockly.FieldDropdown(DIRECTION_OPTIONS.map(o => [o.text, o.value])), 'SIDE')
+    this.appendValueInput('COUNT').setCheck('Number').appendField(_b('数量', 'Count'))
     this.setPreviousStatement(true); this.setNextStatement(true)
     this.setColour('#FF9A76'); this.setTooltip('向指定方向丢弃物品')
   },
@@ -178,6 +179,7 @@ Blockly.Blocks['turtle_suck'] = {
   init: function() {
     this.appendDummyInput().appendField(_b('🐢 吸取', '🐢 Suck'))
       .appendField(new Blockly.FieldDropdown(DIRECTION_OPTIONS.map(o => [o.text, o.value])), 'SIDE')
+    this.appendValueInput('COUNT').setCheck('Number').appendField(_b('数量', 'Count'))
     this.setPreviousStatement(true); this.setNextStatement(true)
     this.setColour('#FF9A76'); this.setTooltip('从指定方向吸取物品')
   },
@@ -212,9 +214,9 @@ Blockly.Blocks['turtle_transferTo'] = {
 }
 Blockly.Blocks['turtle_equip'] = {
   init: function() {
-    this.appendDummyInput().appendField(_b('🐢 装备', '🐢 Equip'))
+    this.appendDummyInput().appendField(_b('🐢 装备(弃用)', '🐢 Equip (Deprecated)'))
     this.setPreviousStatement(true); this.setNextStatement(true)
-    this.setColour('#FF9A76'); this.setTooltip('装备当前槽位的工具')
+    this.setColour('#FF9A76'); this.setTooltip('装备当前槽位的工具（已弃用，建议使用装备左侧/右侧）')
   },
 }
 Blockly.Blocks['turtle_inspect'] = {
@@ -322,6 +324,7 @@ Blockly.Blocks['turtle_inspectDown'] = {
 Blockly.Blocks['turtle_dropUp'] = {
   init: function() {
     this.appendDummyInput().appendField(_b('🐢 丢弃上方', '🐢 Drop Up'))
+    this.appendValueInput('COUNT').setCheck('Number').appendField(_b('数量', 'Count'))
     this.setPreviousStatement(true); this.setNextStatement(true)
     this.setColour('#FF9A76'); this.setTooltip('向上丢弃物品')
   },
@@ -329,6 +332,7 @@ Blockly.Blocks['turtle_dropUp'] = {
 Blockly.Blocks['turtle_dropDown'] = {
   init: function() {
     this.appendDummyInput().appendField(_b('🐢 丢弃下方', '🐢 Drop Down'))
+    this.appendValueInput('COUNT').setCheck('Number').appendField(_b('数量', 'Count'))
     this.setPreviousStatement(true); this.setNextStatement(true)
     this.setColour('#FF9A76'); this.setTooltip('向下丢弃物品')
   },
@@ -336,6 +340,7 @@ Blockly.Blocks['turtle_dropDown'] = {
 Blockly.Blocks['turtle_suckUp'] = {
   init: function() {
     this.appendDummyInput().appendField(_b('🐢 吸取上方', '🐢 Suck Up'))
+    this.appendValueInput('COUNT').setCheck('Number').appendField(_b('数量', 'Count'))
     this.setPreviousStatement(true); this.setNextStatement(true)
     this.setColour('#FF9A76'); this.setTooltip('从上方吸取物品')
   },
@@ -343,6 +348,7 @@ Blockly.Blocks['turtle_suckUp'] = {
 Blockly.Blocks['turtle_suckDown'] = {
   init: function() {
     this.appendDummyInput().appendField(_b('🐢 吸取下方', '🐢 Suck Down'))
+    this.appendValueInput('COUNT').setCheck('Number').appendField(_b('数量', 'Count'))
     this.setPreviousStatement(true); this.setNextStatement(true)
     this.setColour('#FF9A76'); this.setTooltip('从下方吸取物品')
   },
@@ -386,6 +392,29 @@ Blockly.Blocks['turtle_getItemSpace'] = {
       .appendField(_b('剩余空间', 'Free Space'))
     this.setOutput(true, 'Number'); this.setColour('#FF9A76')
     this.setTooltip('获取指定槽位剩余空间')
+  },
+}
+
+// === Craft & Equip ===
+Blockly.Blocks['turtle_craft'] = {
+  init: function() {
+    this.appendValueInput('LIMIT').setCheck('Number').appendField(_b('🐢 合成', '🐢 Craft'))
+    this.setOutput(true, 'Boolean'); this.setColour('#FF9A76')
+    this.setTooltip('使用合成台升级合成物品')
+  },
+}
+Blockly.Blocks['turtle_equipLeft'] = {
+  init: function() {
+    this.appendDummyInput().appendField(_b('🐢 装备左侧', '🐢 Equip Left'))
+    this.setPreviousStatement(true); this.setNextStatement(true)
+    this.setColour('#FF9A76'); this.setTooltip('将当前槽位物品装备到左侧升级槽')
+  },
+}
+Blockly.Blocks['turtle_equipRight'] = {
+  init: function() {
+    this.appendDummyInput().appendField(_b('🐢 装备右侧', '🐢 Equip Right'))
+    this.setPreviousStatement(true); this.setNextStatement(true)
+    this.setColour('#FF9A76'); this.setTooltip('将当前槽位物品装备到右侧升级槽')
   },
 }
 

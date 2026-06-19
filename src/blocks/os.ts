@@ -86,8 +86,11 @@ Blockly.Blocks['term_isColor'] = {
 Blockly.Blocks['term_read'] = {
   init: function() {
     this.appendDummyInput().appendField(_b('📺 读取输入', '📺 Read'))
+    this.appendValueInput('REPLACE').setCheck('String').appendField(_b('遮罩字符', 'Replace Char'))
+    this.appendValueInput('HISTORY').setCheck(null).appendField(_b('历史记录', 'History'))
+    this.setInputsInline(true)
     this.setOutput(true, 'String'); this.setColour('#4D96FF')
-    this.setTooltip('读取用户输入')
+    this.setTooltip('读取用户输入，可设置密码遮罩字符和历史记录')
   },
 }
 Blockly.Blocks['term_redirect'] = {
@@ -146,6 +149,26 @@ Blockly.Blocks['term_blit'] = {
     this.appendValueInput('BG_COLOR').setCheck('String').appendField(_b('背景色', 'Background'))
     this.setPreviousStatement(true); this.setNextStatement(true)
     this.setColour('#4D96FF'); this.setTooltip('用指定前景色和背景色打印文本')
+  },
+}
+
+Blockly.Blocks['term_setPaletteColour'] = {
+  init: function() {
+    this.appendDummyInput().appendField(_b('📺 设置调色板', '📺 Set Palette'))
+      .appendField(new Blockly.FieldDropdown(COLOR_OPTIONS), 'COLOR')
+    this.appendValueInput('R').setCheck('Number').appendField('R')
+    this.appendValueInput('G').setCheck('Number').appendField('G')
+    this.appendValueInput('B').setCheck('Number').appendField('B')
+    this.setPreviousStatement(true); this.setNextStatement(true)
+    this.setColour('#4D96FF'); this.setTooltip('设置调色板颜色(RGB 0~1)')
+  },
+}
+Blockly.Blocks['term_getPaletteColour'] = {
+  init: function() {
+    this.appendDummyInput().appendField(_b('📺 获取调色板', '📺 Get Palette'))
+      .appendField(new Blockly.FieldDropdown(COLOR_OPTIONS), 'COLOR')
+    this.setOutput(true, 'Number'); this.setColour('#4D96FF')
+    this.setTooltip('获取调色板颜色值')
   },
 }
 
@@ -219,19 +242,6 @@ Blockly.Blocks['os_reboot'] = {
     this.setColour('#4D96FF'); this.setTooltip('重启电脑')
   },
 }
-Blockly.Blocks['os_getFuelLevel'] = {
-  init: function() {
-    this.appendDummyInput().appendField(_b('💻 燃料等级', '💻 Fuel Level'))
-    this.setOutput(true, 'Number'); this.setColour('#4D96FF'); this.setTooltip('获取燃料等级')
-  },
-}
-Blockly.Blocks['os_setFuelLevel'] = {
-  init: function() {
-    this.appendValueInput('LEVEL').setCheck('Number').appendField(_b('💻 设置燃料', '💻 Set Fuel'))
-    this.setPreviousStatement(true); this.setNextStatement(true)
-    this.setColour('#4D96FF'); this.setTooltip('设置燃料等级')
-  },
-}
 Blockly.Blocks['os_startTimer'] = {
   init: function() {
     this.appendValueInput('TIME').setCheck('Number').appendField(_b('💻 启动定时器', '💻 Start Timer'))
@@ -270,6 +280,33 @@ Blockly.Blocks['os_day'] = {
   init: function() {
     this.appendDummyInput().appendField(_b('💻 游戏天数', '💻 Game Day'))
     this.setOutput(true, 'Number'); this.setColour('#4D96FF'); this.setTooltip('获取游戏天数')
+  },
+}
+
+Blockly.Blocks['os_epoch'] = {
+  init: function() {
+    this.appendDummyInput().appendField(_b('💻 时间戳', '💻 Epoch'))
+      .appendField(new Blockly.FieldDropdown([
+        [_b('游戏内', 'In-game'), 'ingame'],
+        [_b('UTC', 'UTC'), 'utc'],
+        [_b('本地', 'Local'), 'local'],
+      ]), 'LOCALE')
+    this.setOutput(true, 'Number'); this.setColour('#4D96FF')
+    this.setTooltip('获取时间戳（毫秒）')
+  },
+}
+Blockly.Blocks['os_date'] = {
+  init: function() {
+    this.appendValueInput('FORMAT').setCheck('String').appendField(_b('💻 格式化日期', '💻 Date'))
+    this.setOutput(true, 'String'); this.setColour('#4D96FF')
+    this.setTooltip('格式化日期，格式如 "*t" 返回表，"%Y-%m-%d" 返回字符串')
+  },
+}
+Blockly.Blocks['os_pullEventRaw'] = {
+  init: function() {
+    this.appendValueInput('FILTER').setCheck('String').appendField(_b('💻 拉取原始事件', '💻 Pull Event Raw'))
+    this.setOutput(true, 'Array'); this.setColour('#4D96FF')
+    this.setTooltip('拉取事件（包括terminate事件，不会被Ctrl+T终止）')
   },
 }
 

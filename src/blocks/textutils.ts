@@ -114,12 +114,22 @@ Blockly.Blocks['textutils_pagedPrint'] = {
 Blockly.Blocks['textutils_tabulate'] = {
   init: function() {
     this.appendValueInput('TABLE')
-      .setCheck('Array')
       .appendField(_b('📝 表格输出', '📝 Tabulate'))
     this.setPreviousStatement(true)
     this.setNextStatement(true)
     this.setColour('#8E44AD')
     this.setTooltip('以表格形式输出数据')
+  },
+}
+
+Blockly.Blocks['textutils_pagedTabulate'] = {
+  init: function() {
+    this.appendValueInput('TABLE')
+      .appendField(_b('📝 分页表格输出', '📝 Paged Tabulate'))
+    this.setPreviousStatement(true)
+    this.setNextStatement(true)
+    this.setColour('#8E44AD')
+    this.setTooltip('以分页表格形式输出数据')
   },
 }
 

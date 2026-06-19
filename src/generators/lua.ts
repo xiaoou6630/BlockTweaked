@@ -51,12 +51,14 @@ export function initGenerators() {
 
   luaGenerator.forBlock['turtle_drop'] = (block: Blockly.Block) => {
     const side = block.getFieldValue('SIDE')
-    return `turtle.drop("${side}")\n`
+    const count = luaGenerator.valueToCode(block, 'COUNT', Order.NONE)
+    return count ? `turtle.drop("${side}", ${count})\n` : `turtle.drop("${side}")\n`
   }
 
   luaGenerator.forBlock['turtle_suck'] = (block: Blockly.Block) => {
     const side = block.getFieldValue('SIDE')
-    return `turtle.suck("${side}")\n`
+    const count = luaGenerator.valueToCode(block, 'COUNT', Order.NONE)
+    return count ? `turtle.suck("${side}", ${count})\n` : `turtle.suck("${side}")\n`
   }
 
   luaGenerator.forBlock['turtle_attack'] = (block: Blockly.Block) => {
@@ -99,10 +101,22 @@ export function initGenerators() {
   luaGenerator.forBlock['turtle_compareDown'] = () => ['turtle.compareDown()', Order.HIGH]
   luaGenerator.forBlock['turtle_inspectUp'] = () => ['turtle.inspectUp()', Order.HIGH]
   luaGenerator.forBlock['turtle_inspectDown'] = () => ['turtle.inspectDown()', Order.HIGH]
-  luaGenerator.forBlock['turtle_dropUp'] = () => 'turtle.dropUp()\n'
-  luaGenerator.forBlock['turtle_dropDown'] = () => 'turtle.dropDown()\n'
-  luaGenerator.forBlock['turtle_suckUp'] = () => 'turtle.suckUp()\n'
-  luaGenerator.forBlock['turtle_suckDown'] = () => 'turtle.suckDown()\n'
+  luaGenerator.forBlock['turtle_dropUp'] = (block: Blockly.Block) => {
+    const count = luaGenerator.valueToCode(block, 'COUNT', Order.NONE)
+    return count ? `turtle.dropUp(${count})\n` : 'turtle.dropUp()\n'
+  }
+  luaGenerator.forBlock['turtle_dropDown'] = (block: Blockly.Block) => {
+    const count = luaGenerator.valueToCode(block, 'COUNT', Order.NONE)
+    return count ? `turtle.dropDown(${count})\n` : 'turtle.dropDown()\n'
+  }
+  luaGenerator.forBlock['turtle_suckUp'] = (block: Blockly.Block) => {
+    const count = luaGenerator.valueToCode(block, 'COUNT', Order.NONE)
+    return count ? `turtle.suckUp(${count})\n` : 'turtle.suckUp()\n'
+  }
+  luaGenerator.forBlock['turtle_suckDown'] = (block: Blockly.Block) => {
+    const count = luaGenerator.valueToCode(block, 'COUNT', Order.NONE)
+    return count ? `turtle.suckDown(${count})\n` : 'turtle.suckDown()\n'
+  }
   luaGenerator.forBlock['turtle_getFuelLevel'] = () => ['turtle.getFuelLevel()', Order.HIGH]
   luaGenerator.forBlock['turtle_getFuelLimit'] = () => ['turtle.getFuelLimit()', Order.HIGH]
 
@@ -117,6 +131,13 @@ export function initGenerators() {
     const slot = block.getFieldValue('SLOT')
     return [`turtle.getItemSpace(${slot})`, Order.HIGH]
   }
+
+  luaGenerator.forBlock['turtle_craft'] = (block: Blockly.Block) => {
+    const limit = luaGenerator.valueToCode(block, 'LIMIT', Order.NONE) || '64'
+    return [`turtle.craft(${limit})`, Order.HIGH]
+  }
+  luaGenerator.forBlock['turtle_equipLeft'] = () => 'turtle.equipLeft()\n'
+  luaGenerator.forBlock['turtle_equipRight'] = () => 'turtle.equipRight()\n'
 
   // Redstone
   luaGenerator.forBlock['redstone_getInput'] = (block: Blockly.Block) => {
@@ -415,7 +436,14 @@ export function initGenerators() {
   }
 
   luaGenerator.forBlock['term_isColor'] = () => ['term.isColor()', Order.HIGH]
-  luaGenerator.forBlock['term_read'] = () => ['term.read()', Order.HIGH]
+  luaGenerator.forBlock['term_read'] = (block: Blockly.Block) => {
+    const replace = luaGenerator.valueToCode(block, 'REPLACE', Order.NONE)
+    const history = luaGenerator.valueToCode(block, 'HISTORY', Order.NONE)
+    const args = []
+    if (replace) args.push(replace)
+    if (history) args.push(history)
+    return args.length > 0 ? [`term.read(${args.join(', ')})`, Order.HIGH] : ['term.read()', Order.HIGH]
+  }
 
   luaGenerator.forBlock['os_getComputerID'] = () => ['os.getComputerID()', Order.HIGH]
   luaGenerator.forBlock['os_getComputerLabel'] = () => ['os.getComputerLabel()', Order.HIGH]
@@ -461,13 +489,6 @@ export function initGenerators() {
 
   luaGenerator.forBlock['term_getCursorBlink'] = () => ['term.getCursorBlink()', Order.HIGH]
 
-  luaGenerator.forBlock['os_getFuelLevel'] = () => ['os.getFuelLevel()', Order.HIGH]
-
-  luaGenerator.forBlock['os_setFuelLevel'] = (block: Blockly.Block) => {
-    const level = luaGenerator.valueToCode(block, 'LEVEL', Order.NONE) || '0'
-    return `os.setFuelLevel(${level})\n`
-  }
-
   luaGenerator.forBlock['os_startTimer'] = (block: Blockly.Block) => {
     const time = luaGenerator.valueToCode(block, 'TIME', Order.NONE) || '1'
     return `os.startTimer(${time})\n`
@@ -491,6 +512,19 @@ export function initGenerators() {
   luaGenerator.forBlock['os_version'] = () => ['os.version()', Order.HIGH]
   luaGenerator.forBlock['os_day'] = () => ['os.day()', Order.HIGH]
 
+  luaGenerator.forBlock['os_epoch'] = (block: Blockly.Block) => {
+    const locale = block.getFieldValue('LOCALE')
+    return [`os.epoch("${locale}")`, Order.HIGH]
+  }
+  luaGenerator.forBlock['os_date'] = (block: Blockly.Block) => {
+    const format = luaGenerator.valueToCode(block, 'FORMAT', Order.NONE) || '"*t"'
+    return [`os.date(${format})`, Order.HIGH]
+  }
+  luaGenerator.forBlock['os_pullEventRaw'] = (block: Blockly.Block) => {
+    const filter = luaGenerator.valueToCode(block, 'FILTER', Order.NONE) || 'nil'
+    return [`{os.pullEventRaw(${filter})}`, Order.HIGH]
+  }
+
   luaGenerator.forBlock['term_blit'] = (block: Blockly.Block) => {
     const text = luaGenerator.valueToCode(block, 'TEXT', Order.NONE) || '""'
     const textColor = luaGenerator.valueToCode(block, 'TEXT_COLOR', Order.NONE) || '""'
@@ -500,6 +534,18 @@ export function initGenerators() {
 
   luaGenerator.forBlock['term_getTextColor'] = () => ['term.getTextColor()', Order.HIGH]
   luaGenerator.forBlock['term_getBackgroundColor'] = () => ['term.getBackgroundColor()', Order.HIGH]
+
+  luaGenerator.forBlock['term_setPaletteColour'] = (block: Blockly.Block) => {
+    const color = block.getFieldValue('COLOR')
+    const r = luaGenerator.valueToCode(block, 'R', Order.NONE) || '0'
+    const g = luaGenerator.valueToCode(block, 'G', Order.NONE) || '0'
+    const b = luaGenerator.valueToCode(block, 'B', Order.NONE) || '0'
+    return `term.setPaletteColour(colors.${color}, ${r}, ${g}, ${b})\n`
+  }
+  luaGenerator.forBlock['term_getPaletteColour'] = (block: Blockly.Block) => {
+    const color = block.getFieldValue('COLOR')
+    return [`{term.getPaletteColour(colors.${color})}`, Order.HIGH]
+  }
 
   // Math
   luaGenerator.forBlock['math_number'] = (block: Blockly.Block) => {
@@ -711,17 +757,23 @@ export function initGenerators() {
   luaGenerator.forBlock['rednet_send'] = (block: Blockly.Block) => {
     const recipient = luaGenerator.valueToCode(block, 'RECIPIENT', Order.NONE) || '0'
     const message = luaGenerator.valueToCode(block, 'MESSAGE', Order.NONE) || '""'
-    return `rednet.send(${recipient}, ${message})\n`
+    const protocol = luaGenerator.valueToCode(block, 'PROTOCOL', Order.NONE)
+    return protocol ? `rednet.send(${recipient}, ${message}, ${protocol})\n` : `rednet.send(${recipient}, ${message})\n`
   }
 
   luaGenerator.forBlock['rednet_broadcast'] = (block: Blockly.Block) => {
     const message = luaGenerator.valueToCode(block, 'MESSAGE', Order.NONE) || '""'
-    return `rednet.broadcast(${message})\n`
+    const protocol = luaGenerator.valueToCode(block, 'PROTOCOL', Order.NONE)
+    return protocol ? `rednet.broadcast(${message}, ${protocol})\n` : `rednet.broadcast(${message})\n`
   }
 
   luaGenerator.forBlock['rednet_receive'] = (block: Blockly.Block) => {
-    const timeout = luaGenerator.valueToCode(block, 'TIMEOUT', Order.NONE) || 'nil'
-    return [`{rednet.receive(${timeout})}`, Order.HIGH]
+    const protocol = luaGenerator.valueToCode(block, 'PROTOCOL', Order.NONE)
+    const timeout = luaGenerator.valueToCode(block, 'TIMEOUT', Order.NONE)
+    const args = []
+    if (protocol) args.push(protocol)
+    if (timeout) args.push(timeout)
+    return [`{rednet.receive(${args.join(', ') || 'nil'})}`, Order.HIGH]
   }
 
   luaGenerator.forBlock['rednet_host'] = (block: Blockly.Block) => {
@@ -911,6 +963,11 @@ export function initGenerators() {
     return `textutils.tabulate(${table})\n`
   }
 
+  luaGenerator.forBlock['textutils_pagedTabulate'] = (block: Blockly.Block) => {
+    const table = luaGenerator.valueToCode(block, 'TABLE', Order.NONE) || '{}'
+    return `textutils.pagedTabulate(${table})\n`
+  }
+
   // Parallel
   luaGenerator.forBlock['parallel_waitForAny'] = (block: Blockly.Block) => {
     const functions = luaGenerator.statementToCode(block, 'FUNCTIONS')
@@ -1034,6 +1091,11 @@ export function initGenerators() {
     return [`keys.getName(${key})`, Order.HIGH]
   }
 
+  luaGenerator.forBlock['keys_getCode'] = (block: Blockly.Block) => {
+    const name = luaGenerator.valueToCode(block, 'NAME', Order.NONE) || '""'
+    return [`keys.getCode(${name})`, Order.HIGH]
+  }
+
   // Settings
   luaGenerator.forBlock['settings_define'] = (block: Blockly.Block) => {
     const name = luaGenerator.valueToCode(block, 'NAME', Order.NONE) || '""'
@@ -1048,7 +1110,8 @@ export function initGenerators() {
 
   luaGenerator.forBlock['settings_get'] = (block: Blockly.Block) => {
     const name = luaGenerator.valueToCode(block, 'NAME', Order.NONE) || '""'
-    return [`settings.get(${name})`, Order.HIGH]
+    const def = luaGenerator.valueToCode(block, 'DEFAULT', Order.NONE)
+    return def ? [`settings.get(${name}, ${def})`, Order.HIGH] : [`settings.get(${name})`, Order.HIGH]
   }
 
   luaGenerator.forBlock['settings_unset'] = (block: Blockly.Block) => {
@@ -1068,6 +1131,16 @@ export function initGenerators() {
   luaGenerator.forBlock['settings_save'] = (block: Blockly.Block) => {
     const path = luaGenerator.valueToCode(block, 'PATH', Order.NONE) || '""'
     return `settings.save(${path})\n`
+  }
+
+  luaGenerator.forBlock['settings_undefine'] = (block: Blockly.Block) => {
+    const name = luaGenerator.valueToCode(block, 'NAME', Order.NONE) || '""'
+    return `settings.undefine(${name})\n`
+  }
+
+  luaGenerator.forBlock['settings_getDetails'] = (block: Blockly.Block) => {
+    const name = luaGenerator.valueToCode(block, 'NAME', Order.NONE) || '""'
+    return [`settings.getDetails(${name})`, Order.HIGH]
   }
 
   // ===== Hat 积木（实心帽子，无内槽）=====
@@ -1143,6 +1216,11 @@ export function initGenerators() {
     return `print(${text})\n`
   }
   luaGenerator.forBlock['read'] = () => ['read()', Order.HIGH]
+
+  luaGenerator.forBlock['printError'] = (block: Blockly.Block) => {
+    const text = luaGenerator.valueToCode(block, 'TEXT', Order.NONE) || '""'
+    return `printError(${text})\n`
+  }
 
   // IO
   luaGenerator.forBlock['io_open'] = (block: Blockly.Block) => {

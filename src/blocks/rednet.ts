@@ -34,22 +34,25 @@ Blockly.Blocks['rednet_send'] = {
   init: function() {
     this.appendValueInput('RECIPIENT').setCheck('Number').appendField(_b('📡 发送红网消息到', '📡 Send To'))
     this.appendValueInput('MESSAGE').setCheck(null).appendField(_b('消息', 'Message'))
+    this.appendValueInput('PROTOCOL').setCheck('String').appendField(_b('协议', 'Protocol'))
     this.setPreviousStatement(true); this.setNextStatement(true)
-    this.setColour('#E67E22'); this.setTooltip('向指定ID的计算机发送消息')
+    this.setColour('#E67E22'); this.setTooltip('向指定ID的计算机发送消息，可指定协议')
   },
 }
 Blockly.Blocks['rednet_broadcast'] = {
   init: function() {
     this.appendValueInput('MESSAGE').setCheck(null).appendField(_b('📡 广播红网消息', '📡 Broadcast'))
+    this.appendValueInput('PROTOCOL').setCheck('String').appendField(_b('协议', 'Protocol'))
     this.setPreviousStatement(true); this.setNextStatement(true)
-    this.setColour('#E67E22'); this.setTooltip('向所有使用红网的设备广播消息')
+    this.setColour('#E67E22'); this.setTooltip('向所有使用红网的设备广播消息，可指定协议')
   },
 }
 Blockly.Blocks['rednet_receive'] = {
   init: function() {
-    this.appendValueInput('TIMEOUT').setCheck('Number').appendField(_b('📡 接收红网消息 超时', '📡 Receive Timeout'))
+    this.appendValueInput('PROTOCOL').setCheck('String').appendField(_b('📡 接收红网消息 协议', '📡 Receive Protocol'))
+    this.appendValueInput('TIMEOUT').setCheck('Number').appendField(_b('超时', 'Timeout'))
     this.setOutput(true, 'Array'); this.setColour('#E67E22')
-    this.setTooltip('等待接收红网消息，返回{id, message}')
+    this.setTooltip('等待接收红网消息，可指定协议过滤和超时')
   },
 }
 Blockly.Blocks['rednet_host'] = {
